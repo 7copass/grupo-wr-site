@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Grupo WR — Página de captura (consórcio)
 
-## Getting Started
+Landing page de captação de leads para o consórcio do **Grupo WR**, inspirada na
+estrutura da Bamaq Digital, com identidade própria (preto / vermelho / prata
+metálica).
 
-First, run the development server:
+Stack: **Next.js 16 (App Router) + TypeScript + Tailwind CSS 4**. Deploy alvo:
+**Vercel**.
+
+## Rodando localmente
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # http://localhost:3000
+npm run build    # build de produção
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Estrutura
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+src/
+  app/
+    layout.tsx        # fontes (Poppins) + metadata/SEO
+    page.tsx          # composição das seções
+    globals.css       # design system (tokens de cor, botões, inputs)
+    api/lead/route.ts # endpoint de captura de leads (STUB)
+  components/
+    Header.tsx        Hero.tsx        Simulator.tsx   Steps.tsx
+    Conditions.tsx    WhyWR.tsx       Testimonials.tsx Faq.tsx
+    FinalCta.tsx      Footer.tsx      LeadForm.tsx     Logo.tsx
+    WhatsAppFab.tsx
+  lib/
+    site.ts           # >>> dados do Grupo WR (contato, legal, WhatsApp) <<<
+    plans.ts          # segmentos + geração das cartas de crédito
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## O que falta preencher (dados oficiais)
 
-## Learn More
+Editar **`src/lib/site.ts`**:
+- `whatsapp` — número com DDI+DDD (ex.: `5531999999999`)
+- `phoneDisplay`, `email`, `city`
+- `legal.razaoSocial`, `legal.cnpj`
+- Texto legal do rodapé em `Footer.tsx` — ajustar conforme o WR seja
+  **administradora própria** (autorizada Bacen) ou **representante** de outra.
 
-To learn more about Next.js, take a look at the following resources:
+Logo oficial: colocar o PNG em `public/logo-wr.png` e trocar o bloco SVG em
+`components/Logo.tsx` por `<img>`. (Hoje o logo é recriado em SVG.)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Tabela de cartas de crédito: valores em `src/lib/plans.ts` são **ilustrativos**.
+Substituir por tabela oficial quando disponível.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Integração de leads (pendente — a fazer quando liberar)
 
-## Deploy on Vercel
+Hoje `POST /api/lead` só valida e loga no servidor (stub). Pontos de integração
+marcados com `TODO` em `src/app/api/lead/route.ts`:
+1. Gravar o lead no **Supabase** (tabela `leads`).
+2. Acionar a **API de WhatsApp** para contato direto com o lead.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+O formulário (`LeadForm.tsx`) já envia nome, telefone, e-mail, segmento e origem.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Notas de design
+
+- Cores e estilos centralizados em CSS variables (`--wr-*`) em `globals.css` —
+  trocar a paleta é trivial.
+- `scroll-behavior` está em `auto`. Para reativar rolagem suave em âncoras,
+  mudar para `smooth` em `globals.css`.

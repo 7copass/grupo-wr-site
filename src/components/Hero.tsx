@@ -53,8 +53,8 @@ export default function Hero() {
 
           <div className="mt-8 flex items-center gap-6">
             <div>
-              <div className="text-2xl font-extrabold metal-text">+2 mil</div>
-              <div className="text-xs text-wr-silver-500">sonhos realizados</div>
+              <div className="text-2xl font-extrabold metal-text">8,9/10</div>
+              <div className="text-xs text-wr-silver-500">avaliação dos clientes</div>
             </div>
             <div className="h-8 w-px bg-wr-border" />
             <div>

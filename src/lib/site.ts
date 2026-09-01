@@ -4,22 +4,22 @@
 export const site = {
   name: "Grupo WR",
   tagline: "Realizando sonhos com planejamento",
-  // Contato — TODO: substituir pelos dados oficiais
-  whatsapp: "5599999999999", // apenas números, com DDI + DDD
-  phoneDisplay: "(00) 0000-0000",
-  email: "contato@grupowr.com.br",
-  city: "Sua cidade — UF",
+  // Contato
+  whatsapp: "5593984009798", // apenas números, com DDI + DDD
+  phoneDisplay: "(93) 98400-9798",
+  email: "grupowrconsorcios@gmail.com",
+  city: "Santarém — PA",
   social: {
     instagram: "#",
     facebook: "#",
     youtube: "#",
   },
-  // Dados legais — TODO: preencher
+  // Dados legais
   legal: {
-    razaoSocial: "Grupo WR",
-    cnpj: "00.000.000/0000-00",
-    // WR é administradora própria (autorizada Bacen) ou representante de outra administradora?
-    // Ajustar o texto do rodapé conforme a resposta.
+    razaoSocial: "Grupo Wallace WR",
+    cnpj: "66.643.266/0001-60",
+    // TODO: confirmar se é administradora própria (autorizada Bacen) ou
+    // representante/vendedor de cotas de outra administradora — ajusta o texto do rodapé.
   },
 } as const;
 

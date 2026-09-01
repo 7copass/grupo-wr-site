@@ -1,10 +1,10 @@
-import { IconShield, IconSpark, IconStar, IconWallet } from "./icons";
+import { IconShield, IconSpark, IconWallet } from "./icons";
 
 const stats = [
-  { value: "+2 mil", label: "clientes atendidos", star: false },
-  { value: "+R$50mi", label: "em créditos liberados", star: false },
-  { value: "100%", label: "digital e transparente", star: false },
-  { value: "4.9", label: "avaliação dos clientes", star: true },
+  { value: "+R$5 mi", label: "já liberados em crédito" },
+  { value: "+R$50 mi", label: "em cartas de crédito" },
+  { value: "100%", label: "digital e transparente" },
+  { value: "8,9/10", label: "avaliação dos clientes" },
 ];
 
 const pillarIcons = [IconShield, IconSpark, IconWallet];
@@ -48,9 +48,8 @@ export default function WhyWR() {
               key={s.label}
               className="panel p-6 text-center"
             >
-              <div className="flex items-center justify-center gap-1.5 text-3xl font-extrabold metal-text">
+              <div className="text-3xl font-extrabold metal-text">
                 {s.value}
-                {s.star && <IconStar size={22} className="text-wr-red" />}
               </div>
               <div className="mt-1 text-sm text-wr-silver-500">{s.label}</div>
             </div>

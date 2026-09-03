@@ -3,8 +3,9 @@
 import { useMemo, useState } from "react";
 import {
   brl,
-  buildPlans,
+  buildCredits,
   getSegment,
+  parcela,
   segments,
   type SegmentId,
 } from "@/lib/plans";
@@ -12,22 +13,27 @@ import { whatsappLink } from "@/lib/site";
 import { iconById, IconArrowRight } from "./icons";
 
 export default function Simulator() {
-  const [segId, setSegId] = useState<SegmentId>("imovel");
-  const seg = getSegment(segId);
-  const [credito, setCredito] = useState(seg.min + (seg.max - seg.min) * 0.4);
+  const [segId, setSegId] = useState<SegmentId>("automovel");
+  const [planIdx, setPlanIdx] = useState(0);
 
-  // reajusta o crédito ao trocar de segmento
+  const seg = getSegment(segId);
+  const plan = seg.plans[planIdx] ?? seg.plans[0];
+
+  const [credito, setCredito] = useState(
+    Math.round((seg.min + (seg.max - seg.min) * 0.4) / seg.step) * seg.step
+  );
+
+  // reajusta crédito e plano ao trocar de segmento
   function changeSeg(id: SegmentId) {
     const s = getSegment(id);
     setSegId(id);
-    setCredito(s.min + (s.max - s.min) * 0.4);
+    setPlanIdx(0);
+    setCredito(
+      Math.round((s.min + (s.max - s.min) * 0.4) / s.step) * s.step
+    );
   }
 
-  const plans = useMemo(
-    () => buildPlans(seg, seg.min, credito),
-    [seg, credito]
-  );
-
+  const credits = useMemo(() => buildCredits(seg, credito), [seg, credito]);
   const fill = ((credito - seg.min) / (seg.max - seg.min)) * 100;
 
   return (
@@ -40,13 +46,13 @@ export default function Simulator() {
             <span className="metal-text">conquistar?</span>
           </h2>
           <p className="mt-3 text-wr-silver-500">
-            Escolha o bem e a faixa de crédito. Os valores são estimativos — um
-            consultor confirma as condições exatas para você.
+            Escolha o bem, o plano e a faixa de crédito. A parcela é calculada na
+            hora — um consultor confirma as condições exatas para você.
           </p>
         </div>
 
         {/* Seletor de segmento */}
-        <div className="mx-auto mt-8 flex max-w-md gap-3">
+        <div className="mx-auto mt-8 grid max-w-2xl grid-cols-2 gap-3 sm:grid-cols-4">
           {segments.map((s) => {
             const Icon = iconById[s.icon];
             const active = segId === s.id;
@@ -54,7 +60,7 @@ export default function Simulator() {
               <button
                 key={s.id}
                 onClick={() => changeSeg(s.id)}
-                className={`flex-1 rounded-2xl border px-3 py-4 text-center transition ${
+                className={`rounded-2xl border px-3 py-4 text-center transition ${
                   active
                     ? "border-wr-red bg-wr-red/10"
                     : "border-wr-border bg-wr-panel/50 hover:border-wr-silver-500"
@@ -76,12 +82,36 @@ export default function Simulator() {
           })}
         </div>
 
-        {/* Slider */}
+        {/* Painel do simulador */}
         <div className="panel mx-auto mt-6 max-w-2xl p-6">
+          {/* Seletor de plano (nº de parcelas) */}
+          {seg.plans.length > 1 && (
+            <div className="mb-6">
+              <div className="mb-2 text-xs uppercase tracking-wider text-wr-silver-500">
+                Plano
+              </div>
+              <div className="flex gap-2">
+                {seg.plans.map((pl, i) => (
+                  <button
+                    key={pl.parcelas}
+                    onClick={() => setPlanIdx(i)}
+                    className={`flex-1 rounded-xl border py-2.5 text-sm font-bold transition ${
+                      planIdx === i
+                        ? "border-wr-red bg-wr-red/10 text-white"
+                        : "border-wr-border text-wr-silver-500 hover:border-wr-silver-500"
+                    }`}
+                  >
+                    {pl.parcelas}x
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex items-end justify-between">
             <div>
               <div className="text-xs uppercase tracking-wider text-wr-silver-500">
-                Crédito desejado
+                Crédito
               </div>
               <div className="text-2xl font-extrabold text-white">
                 {brl(credito)}
@@ -89,10 +119,10 @@ export default function Simulator() {
             </div>
             <div className="text-right">
               <div className="text-xs uppercase tracking-wider text-wr-silver-500">
-                Parcela a partir de
+                Parcela em {plan.parcelas}x
               </div>
               <div className="text-2xl font-extrabold red-text">
-                {brl(plans[0]?.parcelaReduzida ?? 0)}
+                {brl(parcela(credito, plan))}
               </div>
             </div>
           </div>
@@ -101,7 +131,7 @@ export default function Simulator() {
             className="wr-range mt-5"
             min={seg.min}
             max={seg.max}
-            step={500}
+            step={seg.step}
             value={credito}
             onChange={(e) => setCredito(Number(e.target.value))}
             style={{ ["--fill" as string]: `${fill}%` }}
@@ -115,9 +145,9 @@ export default function Simulator() {
 
         {/* Cards de cartas */}
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {plans.map((p, i) => (
+          {credits.map((c) => (
             <div
-              key={p.id}
+              key={c}
               className="panel flex flex-col p-6 transition hover:-translate-y-1 hover:panel-glow"
             >
               <div className="flex items-center justify-between">
@@ -125,43 +155,37 @@ export default function Simulator() {
                   {seg.label}
                 </span>
                 <span className="rounded-full bg-wr-red/15 px-3 py-1 text-xs font-bold text-wr-red">
-                  {p.reducao}% de redução
+                  {plan.parcelas}x
                 </span>
               </div>
               <div className="mt-4 text-xs uppercase tracking-wider text-wr-silver-500">
                 Crédito de
               </div>
-              <div className="text-2xl font-extrabold text-white">
-                {brl(p.credito)}
-              </div>
+              <div className="text-2xl font-extrabold text-white">{brl(c)}</div>
               <div className="mt-4 text-xs uppercase tracking-wider text-wr-silver-500">
-                Parcela inicial de
+                Parcela de
               </div>
               <div className="text-xl font-extrabold red-text">
-                {brl(p.parcelaReduzida)}
+                {brl(parcela(c, plan))}
               </div>
 
               <dl className="mt-4 space-y-1 border-t border-wr-border pt-4 text-xs text-wr-silver-500">
                 <div className="flex justify-between">
-                  <dt>Taxa de administração</dt>
-                  <dd className="text-white">{p.taxaAdm.toFixed(2)}%</dd>
+                  <dt>Número de parcelas</dt>
+                  <dd className="text-white">{plan.parcelas}x</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt>Fundo de reserva</dt>
-                  <dd className="text-white">{p.fundoReserva.toFixed(2)}%</dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt>Prazo do plano</dt>
-                  <dd className="text-white">{p.prazoMeses} meses</dd>
+                  <dt>Sem juros / sem entrada</dt>
+                  <dd className="text-white">Sim</dd>
                 </div>
               </dl>
 
               <a
                 href={whatsappLink(
                   `Olá! Tenho interesse na carta de ${seg.label} de ${brl(
-                    p.credito
-                  )} (parcela a partir de ${brl(
-                    p.parcelaReduzida
+                    c
+                  )} em ${plan.parcelas}x (parcela de ${brl(
+                    parcela(c, plan)
                   )}). Pode me passar as condições?`
                 )}
                 target="_blank"
@@ -176,8 +200,9 @@ export default function Simulator() {
         </div>
 
         <p className="mt-6 text-center text-xs text-wr-silver-500">
-          {plans.length} produtos exibidos. Valores ilustrativos, sujeitos a
-          análise e às condições do grupo.
+          {seg.official
+            ? "Valores calculados pela tabela vigente, sujeitos a análise e às condições do grupo."
+            : "Valores estimativos, sujeitos a análise e às condições do grupo."}
         </p>
       </div>
     </section>

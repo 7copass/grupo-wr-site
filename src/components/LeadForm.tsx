@@ -131,7 +131,7 @@ export default function LeadForm({
         <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-wr-silver-500">
           O que você quer conquistar?
         </label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {segments.map((s) => {
             const Icon = iconById[s.icon];
             const active = segmento === s.id;

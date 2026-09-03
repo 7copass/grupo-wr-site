@@ -1,19 +1,30 @@
-// Dados dos segmentos e geração das cartas de crédito (valores estimativos/ilustrativos).
-// TODO: substituir por tabela oficial do Grupo WR quando disponível.
+// Produtos, planos e cálculo dinâmico das parcelas do consórcio Grupo WR.
+//
+// A parcela é sempre uma fração fixa do crédito (fator), que muda conforme o
+// plano (número de parcelas). Os fatores de AUTOMÓVEL e PESADO vêm da tabela
+// oficial (FIAT / Crédito Referencial e Pesado):
+//   Leve 100x  = 0,90986%   (R$100.000 -> R$909,86)
+//   Leve 80x   = 1,29063%   (R$100.000 -> R$1.290,63)
+//   Pesado 100x = 1,23076%  (R$300.000 -> R$3.692,28)
+// IMÓVEL e MOTO usam fatores estimativos (official: false) até chegar a tabela
+// oficial desses segmentos.
 
-export type SegmentId = "imovel" | "carro" | "moto";
+export type SegmentId = "imovel" | "automovel" | "pesado" | "moto";
+
+export type PlanOption = {
+  parcelas: number; // número de parcelas (ex.: 100, 80)
+  factor: number; // parcela = credito * factor
+};
 
 export type Segment = {
   id: SegmentId;
   label: string;
-  icon: "home" | "car" | "bike";
+  icon: "home" | "car" | "bike" | "truck";
   min: number;
   max: number;
-  // prazo (meses) e taxa administrativa usados na estimativa da parcela
-  prazoMeses: number;
-  taxaAdm: number; // %
-  fundoReserva: number; // %
-  reducaoAteContemplacao: number; // % de redução da parcela
+  step: number;
+  plans: PlanOption[];
+  official: boolean; // true = fatores da tabela oficial
 };
 
 export const segments: Segment[] = [
@@ -23,21 +34,32 @@ export const segments: Segment[] = [
     icon: "home",
     min: 100000,
     max: 500000,
-    prazoMeses: 200,
-    taxaAdm: 18,
-    fundoReserva: 3,
-    reducaoAteContemplacao: 50,
+    step: 5000,
+    plans: [{ parcelas: 200, factor: 0.006 }],
+    official: false,
   },
   {
-    id: "carro",
-    label: "Carro",
+    id: "automovel",
+    label: "Automóvel",
     icon: "car",
-    min: 40000,
-    max: 200000,
-    prazoMeses: 80,
-    taxaAdm: 17,
-    fundoReserva: 3,
-    reducaoAteContemplacao: 30,
+    min: 50000,
+    max: 180000,
+    step: 5000,
+    plans: [
+      { parcelas: 100, factor: 0.0090986 },
+      { parcelas: 80, factor: 0.0129063 },
+    ],
+    official: true,
+  },
+  {
+    id: "pesado",
+    label: "Pesado",
+    icon: "truck",
+    min: 250000,
+    max: 690000,
+    step: 10000,
+    plans: [{ parcelas: 100, factor: 0.0123076 }],
+    official: true,
   },
   {
     id: "moto",
@@ -45,10 +67,9 @@ export const segments: Segment[] = [
     icon: "bike",
     min: 12000,
     max: 60000,
-    prazoMeses: 60,
-    taxaAdm: 16,
-    fundoReserva: 3,
-    reducaoAteContemplacao: 25,
+    step: 1000,
+    plans: [{ parcelas: 60, factor: 0.0195 }],
+    official: false,
   },
 ];
 
@@ -63,49 +84,22 @@ export const brl = (v: number) =>
     minimumFractionDigits: 2,
   });
 
-// Parcela cheia estimada: (crédito + taxas) / prazo
-export function parcelaCheia(seg: Segment, credito: number) {
-  const total = credito * (1 + (seg.taxaAdm + seg.fundoReserva) / 100);
-  return total / seg.prazoMeses;
+// Parcela dinâmica: fração fixa do crédito conforme o plano.
+export function parcela(credito: number, plan: PlanOption) {
+  return credito * plan.factor;
 }
 
-// Parcela reduzida (plano com redução até a contemplação)
-export function parcelaReduzida(seg: Segment, credito: number) {
-  return parcelaCheia(seg, credito) * (1 - seg.reducaoAteContemplacao / 100);
-}
-
-export type Plan = {
-  id: string;
-  credito: number;
-  parcela: number;
-  parcelaReduzida: number;
-  prazoMeses: number;
-  taxaAdm: number;
-  fundoReserva: number;
-  reducao: number;
-};
-
-// Gera N cartas dentro da faixa selecionada
-export function buildPlans(seg: Segment, min: number, max: number, count = 6): Plan[] {
-  const lo = Math.max(seg.min, Math.min(min, max));
-  const hi = Math.min(seg.max, Math.max(min, max));
-  const step = count > 1 ? (hi - lo) / (count - 1) : 0;
-  const plans: Plan[] = [];
+// Gera N valores de crédito (arredondados ao step) do mínimo até o crédito escolhido,
+// para montar os cards de exemplo.
+export function buildCredits(seg: Segment, credito: number, count = 6): number[] {
+  const hi = Math.min(seg.max, Math.max(seg.min, credito));
+  const lo = seg.min;
+  if (hi <= lo) return [lo];
+  const step = (hi - lo) / (count - 1);
+  const vals: number[] = [];
   for (let i = 0; i < count; i++) {
     const raw = lo + step * i;
-    // arredonda para múltiplos "bonitos"
-    const credito = Math.round(raw / 500) * 500;
-    plans.push({
-      id: `${seg.id}-${i}`,
-      credito,
-      parcela: parcelaCheia(seg, credito),
-      parcelaReduzida: parcelaReduzida(seg, credito),
-      prazoMeses: seg.prazoMeses,
-      taxaAdm: seg.taxaAdm,
-      fundoReserva: seg.fundoReserva,
-      reducao: seg.reducaoAteContemplacao,
-    });
+    vals.push(Math.round(raw / seg.step) * seg.step);
   }
-  // remove duplicados por crédito
-  return plans.filter((p, i, arr) => arr.findIndex((x) => x.credito === p.credito) === i);
+  return Array.from(new Set(vals));
 }

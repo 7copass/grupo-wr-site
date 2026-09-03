@@ -53,6 +53,16 @@ export const IconBike = (p: IconProps) => (
   </Base>
 );
 
+export const IconTruck = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M13 17V6.5a1 1 0 0 0-1-1H3.5a1 1 0 0 0-1 1V16a1 1 0 0 0 1 1h1" />
+    <path d="M13 9h3.8a1 1 0 0 1 .8.4l2.9 3.8a1 1 0 0 1 .2.6V16a1 1 0 0 1-1 1h-1" />
+    <path d="M9 17h4" />
+    <circle cx="6.5" cy="17.5" r="1.9" />
+    <circle cx="16.5" cy="17.5" r="1.9" />
+  </Base>
+);
+
 export const IconCheck = (p: IconProps) => (
   <Base {...p}>
     <path d="m4.5 12.5 4.5 4.5 10.5-11" />
@@ -180,6 +190,7 @@ export const iconById = {
   home: IconHome,
   car: IconCar,
   bike: IconBike,
+  truck: IconTruck,
 } as const;
 
 export type IconId = keyof typeof iconById;

@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { segments } from "@/lib/plans";
+import { buildLeadMessage, sendWhatsAppText } from "@/lib/whatsapp";
 
 export type LeadPayload = {
   nome?: string;
@@ -10,8 +12,7 @@ export type LeadPayload = {
 };
 
 // Rota de captura de leads.
-// STUB: por enquanto apenas valida e registra no log do servidor.
-// TODO (quando o usuário liberar): gravar no Supabase e/ou acionar a API de WhatsApp.
+// Envia os dados do lead para o WhatsApp da equipe (WHATSAPP_TO) via Quepasa.
 export async function POST(req: Request) {
   let body: LeadPayload;
   try {
@@ -21,26 +22,42 @@ export async function POST(req: Request) {
   }
 
   const nome = (body.nome ?? "").trim();
-  const telefone = (body.telefone ?? "").replace(/\D/g, "");
+  const telefone = (body.telefone ?? "").trim();
 
-  if (nome.length < 2 || telefone.length < 10) {
+  if (nome.length < 2 || telefone.replace(/\D/g, "").length < 10) {
     return NextResponse.json(
       { ok: false, error: "missing_fields" },
       { status: 422 }
     );
   }
 
-  // ---- Ponto de integração futura ----
-  // await supabase.from("leads").insert({ ...body });
-  // await enviarWhatsApp(telefone, ...);
-  console.log("[LEAD] novo lead recebido:", {
+  const segmentoLabel =
+    segments.find((s) => s.id === body.segmento)?.label ??
+    body.segmento ??
+    "Não informado";
+
+  const to = process.env.WHATSAPP_TO ?? "5593984009798";
+  const mensagem = buildLeadMessage({
     nome,
     telefone,
-    email: body.email,
-    segmento: body.segmento,
-    credito: body.credito,
+    segmentoLabel,
+    credito: body.credito ? String(body.credito) : undefined,
     origem: body.origem,
   });
+
+  // Envia a notificação. Não bloqueia o visitante se a API falhar —
+  // registramos o erro no log para acompanhamento.
+  const envio = await sendWhatsAppText(to, mensagem);
+  if (!envio.ok) {
+    console.error("[LEAD] falha ao enviar WhatsApp:", envio, {
+      nome,
+      telefone,
+      segmento: segmentoLabel,
+      origem: body.origem,
+    });
+  } else {
+    console.log("[LEAD] enviado ao WhatsApp:", { nome, telefone, segmentoLabel });
+  }
 
   return NextResponse.json({ ok: true });
 }

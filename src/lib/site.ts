@@ -16,7 +16,7 @@ export const site = {
   },
   // Dados legais
   legal: {
-    razaoSocial: "Grupo Wallace WR",
+    razaoSocial: "Grupo WR",
     cnpj: "66.643.266/0001-60",
     // TODO: confirmar se é administradora própria (autorizada Bacen) ou
     // representante/vendedor de cotas de outra administradora — ajusta o texto do rodapé.

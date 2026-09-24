@@ -35,7 +35,7 @@ export default function Logo({ className = "" }: { className?: string }) {
           x="50"
           y="63"
           textAnchor="middle"
-          fontFamily="var(--font-poppins), sans-serif"
+          fontFamily="var(--font-display), sans-serif"
           fontWeight="800"
           fontSize="30"
           letterSpacing="-1"
@@ -49,8 +49,8 @@ export default function Logo({ className = "" }: { className?: string }) {
           <span className="metal-text">GRUPO</span>
           <span className="red-text">WR</span>
         </div>
-        <div className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-wr-silver-500">
-          Realizando sonhos
+        <div className="mt-0.5 whitespace-nowrap text-[8px] font-semibold uppercase tracking-[0.12em] text-wr-silver-500 sm:text-[9px] sm:tracking-[0.16em] lg:text-[8px] lg:tracking-[0.08em] xl:text-[9px] xl:tracking-[0.18em]">
+          Realizando sonhos com planejamento
         </div>
       </div>
     </div>

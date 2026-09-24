@@ -29,7 +29,7 @@ export default function Header() {
           <Logo />
         </a>
 
-        <nav className="hidden items-center gap-7 lg:flex">
+        <nav className="hidden items-center gap-5 lg:flex xl:gap-7">
           {nav.map((item) => (
             <a
               key={item.href}

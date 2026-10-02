@@ -221,6 +221,15 @@ input[type="range"].wr-range::-moz-range-thumb {
   animation: wr-fade-up 0.6s ease both;
 }
 
+@keyframes wr-countdown {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+.wr-countdown-bar {
+  animation: wr-countdown 5s linear forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .reveal { animation: none; }
+  .wr-countdown-bar { animation: none; width: 100%; }
 }

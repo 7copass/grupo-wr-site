@@ -10,10 +10,12 @@ import Faq from "@/components/Faq";
 import FinalCta from "@/components/FinalCta";
 import Footer from "@/components/Footer";
 import WhatsAppFab from "@/components/WhatsAppFab";
+import AuthorizedPopup from "@/components/AuthorizedPopup";
 
 export default function Home() {
   return (
     <>
+      <AuthorizedPopup />
       <Header />
       <main>
         <Hero />

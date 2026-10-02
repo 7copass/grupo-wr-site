@@ -4,6 +4,7 @@ import Simulator from "@/components/Simulator";
 import Steps from "@/components/Steps";
 import Conditions from "@/components/Conditions";
 import WhyWR from "@/components/WhyWR";
+import Brands from "@/components/Brands";
 import Testimonials from "@/components/Testimonials";
 import Faq from "@/components/Faq";
 import FinalCta from "@/components/FinalCta";
@@ -20,6 +21,7 @@ export default function Home() {
         <Steps />
         <Conditions />
         <WhyWR />
+        <Brands />
         <Testimonials />
         <Faq />
         <FinalCta />

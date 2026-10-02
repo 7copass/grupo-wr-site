@@ -45,3 +45,6 @@ next-env.d.ts
 
 # permitir o template (sem segredos)
 !.env.example
+
+# imagens brutas de origem (processadas em public/brands)
+assets-source/

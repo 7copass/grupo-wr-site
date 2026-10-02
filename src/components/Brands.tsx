@@ -3,13 +3,13 @@ import Image from "next/image";
 // Dimensões reais dos PNGs (public/brands/*.png) para o next/image calcular
 // o aspect-ratio corretamente — a altura exibida é controlada via className.
 const brands = [
+  { src: "/brands/fiat.png", alt: "Fiat Consórcio", w: 480, h: 320 },
   {
     src: "/brands/volkswagen.png",
     alt: "Consórcio Volkswagen com a Embracon",
     w: 480,
     h: 232,
   },
-  { src: "/brands/fiat.png", alt: "Fiat Consórcio", w: 480, h: 320 },
   { src: "/brands/yamaha.png", alt: "Yamaha Consórcio", w: 480, h: 223 },
   { src: "/brands/embracon.png", alt: "Consórcio Embracon", w: 480, h: 233 },
   { src: "/brands/ancora.png", alt: "Âncora Consórcios", w: 480, h: 194 },
